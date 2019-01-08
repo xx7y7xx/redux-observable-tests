@@ -12,18 +12,24 @@ describe('Epic ping', () => {
     expect(actual).deep.equal(expected)
   })
   it('should trigger PONG after 1s', () => {
-    testScheduler.run(({ hot, cold, expectObservable }) => {
-      const action$ = hot('-a', {
+    testScheduler.run(helpers => {
+      const { hot, cold, expectObservable, expectSubscriptions } = helpers
+      const input = '-a'
+      const subs = '^----------!'
+      const expected = '- 1s a'
+
+      const action$ = hot(input, {
         a: { type: 'PING' }
       })
 
       const output$ = pingEpic(action$)
 
-      expectObservable(output$).toBe('- 1s a', {
+      expectObservable(output$).toBe(expected, {
         a: {
           type: 'PONG'
         }
       })
+      // expectSubscriptions(output$.subscriptions).toBe(subs)
     })
   })
 })
