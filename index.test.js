@@ -7,6 +7,7 @@ import {
   // actions
   REQUEST,
   SUCCESS,
+  FAILURE,
   // epic
   epic
 } from './index'
@@ -59,6 +60,37 @@ describe('Epic', () => {
           type: SUCCESS,
           response: {
             url: 'https://api.github.com/users/123'
+          }
+        }
+      })
+    })
+  })
+
+  it('should trigger FAILURE action when REQUEST', () => {
+    const testScheduler = new TestScheduler((actual, expected) => {
+      console.log(actual, expected)
+      // somehow assert the two objects are equal
+      // e.g. with chai `expect(actual).deep.equal(expected)`
+    })
+
+    testScheduler.run(({ hot, cold, expectObservable }) => {
+      const action$ = hot('-a', {
+        a: { type: REQUEST, id: '321' }
+      })
+      const state$ = null
+      const dependencies = {
+        getJSON: url => {
+          throw new Error('Foo')
+        }
+      }
+
+      const output$ = epic(action$, state$, dependencies)
+
+      expectObservable(output$).toBe('---a', {
+        a: {
+          type: FAILURE,
+          response: {
+            url: 'https://api.github.com/users/321'
           }
         }
       })
